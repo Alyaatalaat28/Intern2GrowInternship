@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intern_task1/modules/profile.dart';
+
+import 'login.dart';
 
 class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({super.key});
+   RegisterScreen({super.key});
+  TextEditingController userNameController =TextEditingController();
+   TextEditingController passwordController =TextEditingController();
+    TextEditingController emailController =TextEditingController();
+   var formKey=GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Form(
+          key: formKey,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Column(            
@@ -62,6 +70,7 @@ class RegisterScreen extends StatelessWidget {
                   height:20.0
                 ),
                 TextFormField(
+                  controller: userNameController,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
                     label: Text('Username'),
@@ -70,9 +79,16 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     
                   ),
+                      validator: (value){
+                    if(value!.isEmpty){
+                      return 'please enter UserName';
+                    }
+                    return null;
+                  },
                 ),
-                SizedBox(height:20.0),
+               const SizedBox(height:20.0),
                    TextFormField(
+                    controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     label: Text('Email'),
@@ -81,9 +97,17 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     
                   ),
+                      validator: (value){
+                    if(value!.isEmpty){
+                      return 'please enter email';
+                    }
+                    return null;
+                  },
                 ),
-                SizedBox(height:20.0),
+              const  SizedBox(height:20.0),
                 TextFormField(
+                  controller: passwordController,
+                  keyboardType: TextInputType.visiblePassword,
                   obscureText: true,
                   decoration: InputDecoration(
                     label: Text('Password'),
@@ -92,11 +116,20 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     
                   ),
+                      validator: (value){
+                    if(value!.isEmpty){
+                      return 'please enter password';
+                    }
+                    return null;
+                  },
                 ),
                 SizedBox(height:15.0),
                 ListTile(
-                leading: Checkbox(value: false, onChanged:(value){} ),
-                title:Text('Remember me',
+                leading: Checkbox(value: false,
+                 onChanged:(value){
+                    
+                } ),
+                title:const Text('Remember me',
                 style: TextStyle( 
                   fontWeight:FontWeight.bold ,),),
                  trailing:TextButton(child:Text('Have a problem ?',style: TextStyle(
@@ -113,15 +146,19 @@ class RegisterScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4.0),
                   ),
                   child: TextButton(
-                    child: Text('Register',style: TextStyle(
+                    child:const Text('Register',style: TextStyle(
                       color:Colors.white,
                     ),),
-                    onPressed:(){} ),
+                    onPressed:(){
+                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>ProfileScreen()),(route)=>false);
+                    } ),
                 ),
                 SizedBox(height:10.0),
                 Row(children: [
                   Text('Already have an account ?'),
-                  TextButton(onPressed: (){}, child: Text('Log in',style: TextStyle(
+                  TextButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+                  }, child:const Text('Log in',style: TextStyle(
                     fontWeight:FontWeight.bold ,
                       color:Colors.black))),
                 ],)

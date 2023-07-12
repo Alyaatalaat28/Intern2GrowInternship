@@ -1,13 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intern_task1/cubit/cubit.dart';
+import 'package:intern_task1/modules/profile.dart';
+import 'package:intern_task1/modules/register.dart';
+
+import '../cubit/states.dart';
+import '../network/cashe_helper.dart';
+
+var token;
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+   LoginScreen({super.key});
+   TextEditingController userNameController =TextEditingController();
+   TextEditingController passwordController =TextEditingController();
+   var formKey=GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+   return BlocConsumer<AppCubit,AppStates>(
+    listener: (context,state){
+      if(state is AppLoginSuccessState){
+        if(AppCubit.get(context).isChecked)
+        CacheHelper.saveData(key:'token',value:state.user!.token!).then((value) {
+             token=state.user!.token;
+             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>ProfileScreen()), (route) => false);
+        });
+      }
+    },
+    builder:(context,state)=>  Scaffold(
       body: SingleChildScrollView(
         child: Form(
+          key: formKey,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Column(            
@@ -21,7 +44,7 @@ class LoginScreen extends StatelessWidget {
                         alignment: AlignmentDirectional.topCenter,
                      child: Container(
                           height: 140.0,
-                          decoration: BoxDecoration(
+                          decoration:const BoxDecoration(
                             borderRadius: BorderRadius.only(
                               topLeft:Radius.circular(15) ,
                               topRight: Radius.circular(15),
@@ -40,17 +63,17 @@ class LoginScreen extends StatelessWidget {
                           width: 116.0,
                           decoration: BoxDecoration(  
                             borderRadius: BorderRadius.circular(8),                      
-                          image: DecorationImage(
+                          image: const DecorationImage(
                             fit:BoxFit.cover,
                             image: NetworkImage('https://media.licdn.com/dms/image/C4D0BAQH_Mp-p53gDrg/company-logo_200_200/0/1663027328077?e=2147483647&v=beta&t=lWoqg9-XEB1K-UOleshpFzYh0bEgvNChopwCExilLKY')),
                         )),
                     ],
                   ),
                 ),
-                SizedBox(
+               const SizedBox(
                   height:20.0
                 ),
-                Text('Log in to your account',
+               const Text('Log in to your account',
                 textAlign: TextAlign.center,              
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
@@ -62,6 +85,7 @@ class LoginScreen extends StatelessWidget {
                   height:20.0
                 ),
                 TextFormField(
+                  controller: userNameController,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
                     label: Text('Username'),
@@ -70,25 +94,49 @@ class LoginScreen extends StatelessWidget {
                     ),
                     
                   ),
+                  validator: (value){
+                    if(value!.isEmpty){
+                      return 'please enter UserName';
+                    }
+                    return null;
+                  },
                 ),
                 SizedBox(height:20.0),
                 TextFormField(
+                  controller: passwordController,
+                  keyboardType: TextInputType.visiblePassword,
                   obscureText: true,
                   decoration: InputDecoration(
                     label: Text('Password'),
+                    suffixIcon: IconButton(
+                      icon:Icon(
+                        AppCubit.get(context).suffix,
+                      ),
+                      onPressed:(){
+                         AppCubit.get(context).changePasswordVisibility();
+                      }
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0)
                     ),
                     
                   ),
+                      validator: (value){
+                    if(value!.isEmpty){
+                      return 'please enter UserName';
+                    }
+                    return null;                    
+                    }
                 ),
                 SizedBox(height:15.0),
                 ListTile(
-                leading: Checkbox(value: false, onChanged:(value){} ),
-                title:Text('Remember me',
+                leading: Checkbox(value:AppCubit.get(context).isChecked , onChanged:(value){
+                   AppCubit.get(context).changeCheckBox(value!);
+                } ),
+                title:const Text('Remember me',
                 style: TextStyle( 
                   fontWeight:FontWeight.bold ,),),
-                 trailing:TextButton(child:Text('Forgot Password ?',style: TextStyle(
+                 trailing: TextButton(child:Text('Forgot Password ?',style: TextStyle(
                    fontWeight:FontWeight.bold ,
                   color: Colors.black),),
                 onPressed: (){},
@@ -105,12 +153,18 @@ class LoginScreen extends StatelessWidget {
                     child: Text('login',style: TextStyle(
                       color:Colors.white,
                     ),),
-                    onPressed:(){} ),
+                    onPressed:(){
+                      if(formKey.currentState!.validate()){
+                        AppCubit.get(context).userLogin(userName: userNameController.text, password: passwordController.text);
+                      }
+                    } ),
                 ),
-                SizedBox(height:10.0),
+               const SizedBox(height:10.0),
                 Row(children: [
-                  Text('Don\'t have an account ?'),
-                  TextButton(onPressed: (){}, child: Text('Register',style: TextStyle(
+                const  Text('Don\'t have an account ?'),
+                  TextButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>RegisterScreen()));
+                  }, child:const Text('Register',style: TextStyle(
                     fontWeight:FontWeight.bold ,
                       color:Colors.black))),
                 ],)
@@ -118,6 +172,7 @@ class LoginScreen extends StatelessWidget {
             ),
           )),
       ),
-      );
+      )
+   );
   }
 }
