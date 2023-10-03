@@ -20,13 +20,16 @@ class LoginScreen extends StatelessWidget {
    return BlocConsumer<AppCubit,AppStates>(
     listener: (context,state){
       if(state is AppLoginSuccessState){
-        if(AppCubit.get(context).isChecked)
+        if(AppCubit.get(context).isChecked){
         CacheHelper.saveData(key:'token',value:state.user!.token!).then((value) {
              token=state.user!.token;
              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>ProfileScreen()), (route) => false);
         });
       }
-    },
+      else{
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>ProfileScreen()), (route) => false);
+      }
+    }},
     builder:(context,state)=>  Scaffold(
       body: SingleChildScrollView(
         child: Form(
@@ -105,7 +108,7 @@ class LoginScreen extends StatelessWidget {
                 TextFormField(
                   controller: passwordController,
                   keyboardType: TextInputType.visiblePassword,
-                  obscureText: true,
+                  obscureText: AppCubit.get(context).isPassword,
                   decoration: InputDecoration(
                     label: Text('Password'),
                     suffixIcon: IconButton(
